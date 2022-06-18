@@ -2,12 +2,18 @@ import {useEffect, useState} from 'react'
 import Web3Modal from "web3modal";
 import {ethers} from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import {toast, Toaster} from "react-hot-toast";
 
 const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider, // required
     options: {
-      infuraId: "14b979bc481c4c71bc2116ac116e2675" // required
+      infuraId: "14b979bc481c4c71bc2116ac116e2675", // required
+      rpc: {
+        97: 'https://data-seed-prebsc-2-s1.binance.org:8545/',
+      },
+      chainId: 97,
+      network: 'binance'
     },
     display: {
       name: 'WalletConnect',
@@ -30,7 +36,7 @@ function App() {
   const [web3Instance, setWeb3Instance] = useState<any>(null)
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
   const [connection, setConnection] = useState<{address: string, chainId: number}>({address: '', chainId: -1})
-
+  const [event, setEvent] = useState('')
   const handleConnect = async () => {
     const instance = await web3Modal.connect();
     setWeb3Instance(instance)
@@ -47,10 +53,14 @@ function App() {
 
   const handleChangeChain = () => {
     console.log('chain changed')
+    setEvent('net work changed')
+    toast.success('network changed')
   }
 
   const handleAccountChain = () => {
     console.log('account changed')
+    setEvent('account changed')
+    toast.success('account changed')
   }
   //subcribe for events use effect should in updater.tsx
   useEffect(() => {
@@ -75,6 +85,10 @@ function App() {
       <div>
         connected to network id: {connection.chainId} with account: {connection.address}
       </div>
+      <div>
+        events trigger: {event}
+      </div>
+      <Toaster/>
     </div>
   )
 }
