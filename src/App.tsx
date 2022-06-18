@@ -11,6 +11,7 @@ const providerOptions = {
       infuraId: "14b979bc481c4c71bc2116ac116e2675", // required
       rpc: {
         97: 'https://data-seed-prebsc-2-s1.binance.org:8545/',
+        56: 'https://bsc-dataseed.binance.org/'
       },
       chainId: 97,
       network: 'binance'
