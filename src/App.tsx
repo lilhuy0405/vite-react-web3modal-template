@@ -38,9 +38,9 @@ function App() {
   const [connection, setConnection] = useState<{ address: string, chainId: number }>({address: '', chainId: -1})
   const [event, setEvent] = useState('')
   //hooks
-  const handleAddChain = async () => {
+  const handleAddChain = async (web3Instance: any) => {
     try {
-      await window.ethereum.request({
+      await web3Instance.request({
         method: 'wallet_addEthereumChain',
         params: [
           {
@@ -64,7 +64,7 @@ function App() {
       });
     } catch (err: any) {
       if(err.code === -32603 || err.code === 4902 || err.message.includes('Unrecognized chain ID')) {
-        await handleAddChain();
+        await handleAddChain(web3Instance);
       }
     }
   }
