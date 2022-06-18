@@ -46,7 +46,7 @@ function App() {
         params: [{chainId: '0x61'}], // chainId must be in hexadecimal numbers
       });
     } catch (err) {
-      console.log(err)
+      console.log({addChainErr: err})
     }
   }
   const handleConnect = async () => {
