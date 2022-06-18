@@ -51,8 +51,7 @@ function App() {
         ],
       });
     } catch (addError) {
-      console.error(addError);
-
+      console.error({addError});
     }
   }
   const switchChain = async (web3Instance: any) => {
@@ -63,9 +62,10 @@ function App() {
         params: [{chainId: '0x61'}], // chainId must be in hexadecimal numbers
       });
     } catch (err: any) {
-      if(err.code === -32603 || err.code === 4902 || err.message.includes('Unrecognized chain ID')) {
+      if (err.code === -32603 || err.code === 4902 || err.message.includes('Unrecognized chain ID')) {
         await handleAddChain(web3Instance);
       }
+      console.log(err)
     }
   }
   const handleConnect = async () => {
@@ -73,12 +73,13 @@ function App() {
     setWeb3Instance(instance)
     const provider = new ethers.providers.Web3Provider(instance);
     const netWork = await provider.getNetwork();
-    if (netWork.chainId !== 97) {
-      await switchChain(instance)
-    }
+    console.log({netWork})
+    await switchChain(instance)
+    const netWorkAfterSwtich = await provider.getNetwork();
+    console.log({netWorkAfterSwtich})
     const signer = provider.getSigner();
     const address = await signer.getAddress();
-    console.log(netWork)
+
     setConnection({
       chainId: netWork.chainId,
       address
