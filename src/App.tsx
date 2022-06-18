@@ -32,15 +32,31 @@ const web3Modal = new Web3Modal({
 });
 
 function App() {
+  //redux
   const [web3Instance, setWeb3Instance] = useState<any>(null)
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
-  const [connection, setConnection] = useState<{address: string, chainId: number}>({address: '', chainId: -1})
+  const [connection, setConnection] = useState<{ address: string, chainId: number }>({address: '', chainId: -1})
   const [event, setEvent] = useState('')
+  //hooks
+  const switchChain = async (web3Instance: any) => {
+    try {
+      console.log("try to request swtich chain")
+      await web3Instance.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{chainId: '0x61'}], // chainId must be in hexadecimal numbers
+      });
+    } catch (err) {
+      console.log(err)
+    }
+  }
   const handleConnect = async () => {
     const instance = await web3Modal.connect();
     setWeb3Instance(instance)
     const provider = new ethers.providers.Web3Provider(instance);
     const netWork = await provider.getNetwork();
+    if (netWork.chainId !== 97) {
+      await switchChain(instance)
+    }
     const signer = provider.getSigner();
     const address = await signer.getAddress();
     setConnection({
@@ -64,7 +80,7 @@ function App() {
   //subcribe for events use effect should in updater.tsx
   useEffect(() => {
     console.log('subscribe to EIP-1193 events with web3Instance: ' + web3Instance)
-    if(web3Instance) {
+    if (web3Instance) {
       web3Instance.on('accountsChanged', handleAccountChain)
       web3Instance.on('chainChanged', handleChangeChain)
     }
