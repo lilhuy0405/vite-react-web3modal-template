@@ -38,6 +38,23 @@ function App() {
   const [connection, setConnection] = useState<{ address: string, chainId: number }>({address: '', chainId: -1})
   const [event, setEvent] = useState('')
   //hooks
+  const handleAddChain = async () => {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [
+          {
+            chainId: "0x61",
+            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+            chainName: "Smart Chain - Testnet"
+          },
+        ],
+      });
+    } catch (addError) {
+      console.error(addError);
+
+    }
+  }
   const switchChain = async (web3Instance: any) => {
     try {
       console.log("try to request swtich chain")
@@ -45,8 +62,10 @@ function App() {
         method: 'wallet_switchEthereumChain',
         params: [{chainId: '0x61'}], // chainId must be in hexadecimal numbers
       });
-    } catch (err) {
-      console.log({addChainErr: err})
+    } catch (err: any) {
+      if(err.code === -32603 || err.code === 4902 || err.message.includes('Unrecognized chain ID')) {
+        await handleAddChain();
+      }
     }
   }
   const handleConnect = async () => {
@@ -59,6 +78,7 @@ function App() {
     }
     const signer = provider.getSigner();
     const address = await signer.getAddress();
+    console.log(netWork)
     setConnection({
       chainId: netWork.chainId,
       address
