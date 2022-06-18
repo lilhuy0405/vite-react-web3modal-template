@@ -37,49 +37,49 @@ function App() {
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
   const [connection, setConnection] = useState<{ address: string, chainId: number }>({address: '', chainId: -1})
   const [event, setEvent] = useState('')
+
   //hooks
-  const handleAddChain = async (web3Instance: any) => {
+  const switchChain = async (web3Instance: any) => {
     try {
+      console.log("Switch Chain")
+      // this wallet_addEthereumChain request only run if the requested chain is not installed
       await web3Instance.request({
         method: 'wallet_addEthereumChain',
         params: [
           {
             chainId: "0x61",
             rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-            chainName: "Smart Chain - Testnet"
+            chainName: "Smart Chain - Testnet",
+            // these properties below is optional
+            nativeCurrency: {
+              name: 'tBNB',
+              symbol: 'tBNB', // 2-6 characters long
+              decimals: 18
+            },
+            blockExplorerUrls: ['https://testnet.bscscan.com/']
           },
         ],
       });
-    } catch (addError) {
-      console.error({addError});
-    }
-  }
-  const switchChain = async (web3Instance: any) => {
-    try {
-      console.log("try to request swtich chain")
+      // this wallet_switchEthereumChain only run if current chain is not the chain specified
       await web3Instance.request({
         method: 'wallet_switchEthereumChain',
         params: [{chainId: '0x61'}], // chainId must be in hexadecimal numbers
       });
+      return true
     } catch (err: any) {
-      if (err.code === -32603 || err.code === 4902 || err.message.includes('Unrecognized chain ID')) {
-        await handleAddChain(web3Instance);
-      }
       console.log(err)
+      return false
     }
   }
   const handleConnect = async () => {
     const instance = await web3Modal.connect();
-    setWeb3Instance(instance)
+    const isSwitchSuccess = switchChain(instance);
+    if (!isSwitchSuccess) return
     const provider = new ethers.providers.Web3Provider(instance);
     const netWork = await provider.getNetwork();
-    console.log({netWork})
-    await switchChain(instance)
-    const netWorkAfterSwtich = await provider.getNetwork();
-    console.log({netWorkAfterSwtich})
     const signer = provider.getSigner();
     const address = await signer.getAddress();
-
+    setWeb3Instance(instance)
     setConnection({
       chainId: netWork.chainId,
       address
@@ -111,7 +111,7 @@ function App() {
   useEffect(() => {
     console.log('call connect-to-cached-provider useEffect with cached: ' + web3Modal.cachedProvider)
     if (web3Modal.cachedProvider) {
-      handleConnect()
+      handleConnect();
     }
   }, [web3Modal.cachedProvider])
 
