@@ -3,6 +3,7 @@ import {useMemo} from "react";
 import {SMARTCHAIN_TESTNET_CHAIN_ID, SMARTCHAIN_TESTNET_URL, web3Modal} from "../constants";
 import {toast} from "react-hot-toast";
 import {ethers} from "ethers";
+import {getLocalStorageObject, removeItemFromLocalStorage} from "../utils";
 
 const useWeb3 = () => {
   const {
@@ -44,13 +45,19 @@ const useWeb3 = () => {
     if (chainId !== SMARTCHAIN_TESTNET_CHAIN_ID) {
       toast.error("Net work not support")
     }
-    onClearConnection()
+   deActivate()
   }
 
   const handleAccountChain = () => {
-    onClearConnection()
+    deActivate()
   }
   const activate = async () => {
+    //clear cached
+    const cachedWalletConnectDeepLink = getLocalStorageObject('WALLETCONNECT_DEEPLINK_CHOICE')
+    if (cachedWalletConnectDeepLink) {
+      console.log('clear cached deep link')
+      removeItemFromLocalStorage('WALLETCONNECT_DEEPLINK_CHOICE')
+    }
     try {
       const instance = await web3Modal.connect();
       const isSwitchSuccess = await switchChain(instance)
@@ -71,9 +78,11 @@ const useWeb3 = () => {
     }
   }
 
-
+  //disconnect from web3 => update connection state and unsubscribe from events
   const deActivate = () => {
     web3Modal.clearCachedProvider();
+    window.localStorage.removeItem('walletconnect');
+    window.localStorage.removeItem('WALLETCONNECT_DEEPLINK_CHOICE');
     onClearConnection();
   }
 
